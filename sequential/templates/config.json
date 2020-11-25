@@ -1,0 +1,7 @@
+{
+  "batch_sizes":[3],
+  "networks":["five_layer_perceptron"],
+  "smote_sizes":[5],
+  "mutations_probabilities":[0.4,0.5],
+  "adam_rates":[0.00025]
+}
