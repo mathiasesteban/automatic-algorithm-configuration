@@ -3,3 +3,4 @@ __pycache__
 generated
 logs
 /sequential/generated/
+/sequential/output/

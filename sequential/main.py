@@ -3,6 +3,7 @@ import os
 import pathlib
 import json
 import errno
+import re
 
 from datetime import datetime
 
@@ -16,7 +17,7 @@ def sequential_training():
     workdir = pathlib.Path(__file__).parent.absolute()
 
     # Prepare target configurations list
-    config_file = open("templates/config.json", 'r')
+    config_file = open(str(workdir) + "/templates/config.json", 'r')
     config_json = json.loads(config_file.read())
 
     configs = []
@@ -34,8 +35,12 @@ def sequential_training():
                         }
                         configs.append(new_config)
 
+    print("STARTING EXPERIMENT:")
+    print("Configurations:  {}".format(len(configs)))
+    print("Total executions: {}".format(n_executions*len(configs)))
+
     # Train Lipizzaner for each configuration N_EXECUTION times
-    for target_config in configs:
+    for idx, target_config in enumerate(configs):
         for i in range(n_executions):
 
             # Create output directory for experiment
@@ -88,7 +93,9 @@ def sequential_training():
             # Launch clients
             for j in range(grid_size):
                 client_command = ["python", lipizzaner_path, "train", "--distributed", "--client"]
-                lipizzaner_client = subprocess.Popen(client_command)
+                lipizzaner_client = subprocess.Popen(client_command,
+                                                     stdout=subprocess.PIPE,
+                                                     stderr=subprocess.PIPE)
                 clients_pool.append(lipizzaner_client)
 
             # Launch master
@@ -100,12 +107,24 @@ def sequential_training():
                                                universal_newlines=True)
 
             master_stderr = open(output_path + "/master_stderr.log", "wt")
-            master_stderr.write(lipizzaner_master.stderr)
+            master_stderr.write(str(lipizzaner_master.stderr))
             master_stderr.close()
 
             # Kill clients
             for client in clients_pool:
                 client.kill()
+
+            if lipizzaner_master.returncode != 0:
+                print("Config {}: returned non-cero exit code ({})".format(idx, lipizzaner_master.returncode))
+            else:
+                # Parse FID score
+                match = re.search('Best result:.* = \((.*), (.*)\)', lipizzaner_master.stderr)
+                if match is not None:
+                    fid = match.group(1)
+                else:
+                    fid = "not found"
+
+                print("Config {}: frechet inception distance {}".format(idx, fid))
 
 
 if __name__ == "__main__":
