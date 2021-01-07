@@ -4,6 +4,7 @@ import pathlib
 import json
 import errno
 import re
+import time
 
 from datetime import datetime
 
@@ -11,8 +12,8 @@ from datetime import datetime
 def sequential_training():
 
     # Params
-    lipizzaner_path = "/home/mesteban/devel/git/lipizzaner-covidgan/src/main.py"
-    n_executions = 5
+    lipizzaner_path = "/clusteruy/home/mathias.esteban/maestria/lipizzaner-covidgan/src/main.py"
+    n_executions = 1
     grid_size = 1
     workdir = pathlib.Path(__file__).parent.absolute()
 
@@ -93,10 +94,9 @@ def sequential_training():
             # Launch clients
             for j in range(grid_size):
                 client_command = ["python", lipizzaner_path, "train", "--distributed", "--client"]
-                lipizzaner_client = subprocess.Popen(client_command,
-                                                     stdout=subprocess.PIPE,
-                                                     stderr=subprocess.PIPE)
+                lipizzaner_client = subprocess.Popen(client_command,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
                 clients_pool.append(lipizzaner_client)
+                time.sleep(60)
 
             # Launch master
             master_command = ["python", lipizzaner_path, "train", "--distributed", "--master", "-f", config_path]
