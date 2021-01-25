@@ -1,0 +1,6 @@
+name: lipizzaner_parameter_exploration_env
+dependencies:
+- python=3.6
+- pip
+- pip:
+    - -r file:requirements.txt
