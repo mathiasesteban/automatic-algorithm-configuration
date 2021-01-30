@@ -2,12 +2,15 @@ import json
 import pathlib
 import preparer
 import os
+import time
 
 from datetime import datetime
 from sequential import runner_seq
 
 
 def launch():
+
+    start = time.time()
 
     # Load config
     workdir = str(pathlib.Path(__file__).parent.absolute())
@@ -54,11 +57,16 @@ def launch():
         summary_file.write("\n")
         summary_file.writelines(result_values)
 
+
+
     # TODO: Change logic based on irace and mpi runners
     else:
         summary_file.close()
         raise Exception("Experiment name not found")
 
+    end = time.time()
+    wall_clock = end - start
+    summary_file.writelines("\nTotal wall clock: {}".format(wall_clock))
     summary_file.close()
 
 
