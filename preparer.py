@@ -5,6 +5,7 @@ def prepare_seq(workdir, experiment_path, config):
 
     lipizzaner_config = config["lipizzaner_config"]["specific"]
 
+    general_id = 0
     config_id = 0
     experiment_instances = []
 
@@ -21,8 +22,10 @@ def prepare_seq(workdir, experiment_path, config):
                         # Create instance
                         for i in range(1, config["n_executions"]+1):
 
+                            general_id += 1
+
                             # Create instance dir
-                            instance_dir = experiment_path + "/config" + str(config_id) + "-exec" + str(i)
+                            instance_dir = experiment_path + "/{}-C{}E{}".format(general_id, config_id, i)
                             os.mkdir(instance_dir)
 
                             # Create Lipizzaner general config file
