@@ -5,11 +5,12 @@ import subprocess
 import re
 import sys
 import pathlib
+import time
 
 from datetime import datetime
 
 # Fixed params
-LIPIZZANER_PATH = "/home/mesteban/devel/git/lipizzaner-covidgan/src/main.py"
+LIPIZZANER_PATH = "/home/mesteban/git/lipizzaner-covidgan/src/main.py"
 GRID_SIZE = 1
 DIR = pathlib.Path(__file__).parent.absolute()
 
@@ -61,8 +62,9 @@ def train_lipizzaner(batch_size, network, smote_size, mutation_probabilitie, ada
     clients_pool = []
     for i in range(GRID_SIZE):
         client_command = ["python", LIPIZZANER_PATH, "train", "--distributed", "--client"]
-        lipizzaner_client = subprocess.Popen(client_command)
+        lipizzaner_client = subprocess.Popen(client_command,stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         clients_pool.append(lipizzaner_client)
+        time.sleep(20)
 
     # Launch Lipizzaner master: Run waits for the command to finish
     master_command = ["python", LIPIZZANER_PATH, "train", "--distributed", "--master", "-f", config_path]
@@ -75,7 +77,7 @@ def train_lipizzaner(batch_size, network, smote_size, mutation_probabilitie, ada
     # Parse FID score
     match = re.search('Best result:.* = \((.*), (.*)\)', lipizzaner_master.stderr)
     if match is not None:
-        fid = match.group(1)
+        fid = float(match.group(1))
     else:
         fid = -1
 
@@ -128,5 +130,5 @@ if __name__ == "__main__":
 
     fid_score = train_lipizzaner(batch_size, network, smote_size, mutation_probabilitie, adam_rate)
 
-    print(mutation_probabilitie)
+    print(fid_score)
 

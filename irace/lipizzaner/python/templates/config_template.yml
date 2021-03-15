@@ -21,7 +21,7 @@ trainer:
       enabled: False
       type: inception_score
       score_sample_size: 1000
-      cuda: True
+      cuda: False
     fitness:
       fitness_sample_size: 1000
       fitness_mode: average    # worse, best, average
@@ -41,6 +41,6 @@ network:
   loss: bceloss
 master:
   calculate_score: True
-  score_sample_size: 6
+  score_sample_size: 150
   cuda: False
 general: !include general.yml
